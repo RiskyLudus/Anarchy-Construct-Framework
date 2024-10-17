@@ -1,4 +1,4 @@
-namespace UCF.Core.Common
+namespace AnarchyConstructFramework.Core.Common
 {
     public static class Prefixes
     {

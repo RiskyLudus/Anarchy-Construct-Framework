@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using UCF.Core.Data;
+using AnarchyConstructFramework.Core.Data;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace UCF.Core.Common
+namespace AnarchyConstructFramework.Core.Common
 {
-    public class UCFBehaviour : MonoBehaviour
+    public class AnarchyBehaviour : MonoBehaviour
     {
         private List<UnityEventBase> eventListeners = new List<UnityEventBase>();
 

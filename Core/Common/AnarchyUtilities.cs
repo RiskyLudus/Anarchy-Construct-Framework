@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace UCF.Core.Common
+namespace AnarchyConstructFramework.Core.Common
 {
-    public static class UCFUtilities
+    public static class AnarchyUtilities
     {
         public static bool Contains(this LayerMask mask, int layer)
         {

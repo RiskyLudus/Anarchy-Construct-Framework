@@ -1,16 +1,15 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using UCF.Core.ScriptableObjects;
 
-namespace UCF.Core.Editor
+namespace AnarchyConstructFramework.Editor
 {
     public class ConstructWizard : EditorWindow
     {
         private string constructName;
 
         // Define a menu item to invoke this window
-        [MenuItem("UCF/Core/Create Construct")]
+        [MenuItem("Anarchy/Create Construct")]
         static void Init()
         {
             // Create an instance of ConstructWizard and show it
@@ -51,9 +50,9 @@ namespace UCF.Core.Editor
         // Method to create the folder structure for the construct
         private void CreateConstructFolderStructure()
         {
-            UCFSettings settings = UCFEditorFunctions.GetSettings();
+            var settings = AnarchyConstructFrameworkEditorFunctions.GetSettings();
 
-            // Construct the path using UCFSettings properties
+            // Construct the path using AnarchySettings properties
             string constructFolderPath = Path.Combine(settings.PathToConstructs, constructName);
 
             // Create the main construct folder if it doesn't exist

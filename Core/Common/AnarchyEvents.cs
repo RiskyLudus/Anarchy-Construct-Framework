@@ -1,8 +1,8 @@
 using UnityEngine.Events;
 
-namespace UCF.Core.Common
+namespace AnarchyConstructFramework.Core.Common
 {
-    public static class UCFEvents
+    public static class AnarchyEvents
     {
         public static UnityEvent TestEvent1 = new UnityEvent();
         public static UnityEvent<int> TestEvent2 = new UnityEvent<int>();

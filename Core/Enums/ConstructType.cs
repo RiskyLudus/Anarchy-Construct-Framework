@@ -1,4 +1,4 @@
-namespace UCF.Core.Enums
+namespace AnarchyConstructFramework.Core.Enums
 {
     public enum ConstructType
     {

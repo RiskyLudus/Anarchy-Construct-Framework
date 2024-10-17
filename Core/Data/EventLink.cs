@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.Events;
 
-namespace UCF.Core.Data
+namespace AnarchyConstructFramework.Core.Data
 {
     // EventLink struct with 4 generics (probably should be our limit lol)
     public struct EventLink<T1, T2, T3, T4>

@@ -1,18 +1,18 @@
 using System.Linq;
-using UCF.Core.ScriptableObjects;
+using AnarchyConstructFramework.Core.ScriptableObjects;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 
-namespace UCF.Core.Editor
+namespace AnarchyConstructFramework.Editor
 {
     public class AddressablesConstructBuilder
     {
-        [MenuItem("UCF/Core/Build Constructs Addressables Group")]
+        [MenuItem("Anarchy/Build Constructs Addressables Group")]
         static void BuildConstructsGroup()
         {
-            UCFSettings settings = UCFEditorFunctions.GetSettings();
+            AnarchySettings settings = AnarchyConstructFrameworkEditorFunctions.GetSettings();
 
             // Create a new Addressables group named "Constructs"
             CreateAddressablesGroup("Constructs");
