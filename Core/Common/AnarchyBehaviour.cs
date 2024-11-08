@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AnarchyConstructFramework.Core.Data;
 using UnityEngine;
@@ -7,12 +8,12 @@ namespace AnarchyConstructFramework.Core.Common
 {
     public class AnarchyBehaviour : MonoBehaviour
     {
-        private List<UnityEventBase> eventListeners = new List<UnityEventBase>();
+        private Dictionary<UnityEventBase, Delegate> eventListeners = new Dictionary<UnityEventBase, Delegate>();
 
         protected void SetLink(EventLink eventLink)
         {
-            eventListeners.Add(eventLink.UnityEvent);
-            eventLink.UnityEvent.AddListener(new UnityAction(eventLink.Action));
+            eventListeners[eventLink.UnityEvent] = new UnityAction(eventLink.Action);
+            eventLink.UnityEvent.AddListener((UnityAction)eventListeners[eventLink.UnityEvent]);
         }
 
         protected void SetLinks(params EventLink[] eventLinks)
@@ -25,8 +26,8 @@ namespace AnarchyConstructFramework.Core.Common
 
         protected void SetLink<T>(EventLink<T> eventLink)
         {
-            eventListeners.Add(eventLink.UnityEvent);
-            eventLink.UnityEvent.AddListener(new UnityAction<T>(eventLink.Action));
+            eventListeners[eventLink.UnityEvent] = new UnityAction<T>(eventLink.Action);
+            eventLink.UnityEvent.AddListener((UnityAction<T>)eventListeners[eventLink.UnityEvent]);
         }
 
         protected void SetLinks<T>(params EventLink<T>[] eventLinks)
@@ -37,10 +38,10 @@ namespace AnarchyConstructFramework.Core.Common
             }
         }
 
-        protected void SetLink<T1,T2>(EventLink<T1, T2> eventLink)
+        protected void SetLink<T1, T2>(EventLink<T1, T2> eventLink)
         {
-            eventListeners.Add(eventLink.UnityEvent);
-            eventLink.UnityEvent.AddListener(new UnityAction<T1, T2>(eventLink.Action));
+            eventListeners[eventLink.UnityEvent] = new UnityAction<T1, T2>(eventLink.Action);
+            eventLink.UnityEvent.AddListener((UnityAction<T1, T2>)eventListeners[eventLink.UnityEvent]);
         }
 
         protected void SetLinks<T1, T2>(params EventLink<T1, T2>[] eventLinks)
@@ -53,8 +54,8 @@ namespace AnarchyConstructFramework.Core.Common
 
         protected void SetLink<T1, T2, T3>(EventLink<T1, T2, T3> eventLink)
         {
-            eventListeners.Add(eventLink.UnityEvent);
-            eventLink.UnityEvent.AddListener(new UnityAction<T1, T2, T3>(eventLink.Action));
+            eventListeners[eventLink.UnityEvent] = new UnityAction<T1, T2, T3>(eventLink.Action);
+            eventLink.UnityEvent.AddListener((UnityAction<T1, T2, T3>)eventListeners[eventLink.UnityEvent]);
         }
 
         protected void SetLinks<T1, T2, T3>(params EventLink<T1, T2, T3>[] eventLinks)
@@ -67,8 +68,8 @@ namespace AnarchyConstructFramework.Core.Common
 
         protected void SetLink<T1, T2, T3, T4>(EventLink<T1, T2, T3, T4> eventLink)
         {
-            eventListeners.Add(eventLink.UnityEvent);
-            eventLink.UnityEvent.AddListener(new UnityAction<T1, T2, T3, T4>(eventLink.Action));
+            eventListeners[eventLink.UnityEvent] = new UnityAction<T1, T2, T3, T4>(eventLink.Action);
+            eventLink.UnityEvent.AddListener((UnityAction<T1, T2, T3, T4>)eventListeners[eventLink.UnityEvent]);
         }
 
         protected void SetLinks<T1, T2, T3, T4>(params EventLink<T1, T2, T3, T4>[] eventLinks)
@@ -79,26 +80,35 @@ namespace AnarchyConstructFramework.Core.Common
             }
         }
 
-        private void OnEnable()
-        {
-            foreach (var listener in eventListeners)
-            {
-                if (listener != null)
-                {
-                    (listener as UnityEvent)?.RemoveAllListeners();
-                }
-            }
-        }
-
         private void OnDisable()
         {
             foreach (var listener in eventListeners)
             {
-                if (listener != null)
+                if (listener.Key != null && listener.Value != null)
                 {
-                    (listener as UnityEvent)?.RemoveAllListeners();
+                    // Remove only the specific listener we added
+                    switch (listener.Value)
+                    {
+                        case UnityAction unityAction:
+                            (listener.Key as UnityEvent)?.RemoveListener(unityAction);
+                            break;
+                        case UnityAction<object> unityAction1:
+                            (listener.Key as UnityEvent<object>)?.RemoveListener(unityAction1);
+                            break;
+                        case UnityAction<object, object> unityAction2:
+                            (listener.Key as UnityEvent<object, object>)?.RemoveListener(unityAction2);
+                            break;
+                        case UnityAction<object, object, object> unityAction3:
+                            (listener.Key as UnityEvent<object, object, object>)?.RemoveListener(unityAction3);
+                            break;
+                        case UnityAction<object, object, object, object> unityAction4:
+                            (listener.Key as UnityEvent<object, object, object, object>)?.RemoveListener(unityAction4);
+                            break;
+                    }
                 }
             }
+
+            eventListeners.Clear();
         }
     }
 }
