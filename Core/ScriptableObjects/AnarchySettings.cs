@@ -8,5 +8,6 @@ namespace AnarchyConstructFramework.Core.ScriptableObjects
         public string RootNamespace = "AnarchyConstructFramework";
         public string PathToAnarchyConstructFramework = "Assets/Anarchy-Construct-Framework";
         public string PathToConstructs = "Assets/Anarchy-Construct-Framework/_Constructs";
+        public bool UpdateBindingsAfterConstructCreation = true;
     }
 }
