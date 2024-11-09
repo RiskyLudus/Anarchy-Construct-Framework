@@ -92,6 +92,7 @@ namespace AnarchyConstructFramework.Editor
                 settings.PathToConstructs = _constructFolderLocation;
                 settings.RootNamespace = _rootNamespace;
                 AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
             }
             else
             {
