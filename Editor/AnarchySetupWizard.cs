@@ -79,6 +79,7 @@ namespace AnarchyConstructFramework.Editor
             }
 
             AssetDatabase.Refresh();
+            CreateAnarchySettings();
         }
 
         private void CreateAnarchySettings()
