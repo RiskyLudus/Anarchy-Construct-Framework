@@ -1,0 +1,12 @@
+{
+  "name": "com.risky.anarchy-construct-framework",
+  "version": "1.3.2-dev",
+  "displayName": "Anarchy Construct Framework (Dev)",
+  "description": "A modular gameplay architecture centered around message bus and modular gameplay ideas. (Development Version)",
+  "unity": "2022.3",
+  "keywords": ["Anarchy", "Unity", "Framework", "Construct", "Dev"],
+  "author": {
+    "name": "Riza 'Risky' Resnick",
+    "email": "riza@nysom.com"
+  }
+}
