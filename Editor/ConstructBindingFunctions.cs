@@ -1,9 +1,9 @@
-using AnarchyConstructFramework.Core.Common;
 using UnityEditor;
 using System.Reflection;
 using System.Text;
 using System.IO;
 using UnityEngine;
+using AnarchyConstructFramework.Core.Common;
 
 namespace AnarchyConstructFramework.Editor
 {
@@ -16,7 +16,7 @@ namespace AnarchyConstructFramework.Editor
             var settings = AnarchyConstructFrameworkEditorFunctions.GetSettings();
             string anarchyPath = settings.PathToAnarchyConstructFramework;
             string sharedFolderPath = Path.Combine(anarchyPath, "Shared");
-            
+
             // Ensure the shared folder exists
             if (!Directory.Exists(sharedFolderPath))
             {
@@ -28,9 +28,11 @@ namespace AnarchyConstructFramework.Editor
 
             // Start the class definition
             classBuilder.AppendLine("using UnityEngine.Events;");
+            classBuilder.AppendLine("using UnityEngine;");
             classBuilder.AppendLine();
             classBuilder.AppendLine("namespace Anarchy.Shared");
             classBuilder.AppendLine("{");
+            classBuilder.AppendLine("    //This code is auto-generated. Please do not try to edit this file.");
             classBuilder.AppendLine("    public static class ConstructBindings");
             classBuilder.AppendLine("    {");
 
@@ -53,7 +55,7 @@ namespace AnarchyConstructFramework.Editor
                     foreach (var field in fields)
                     {
                         // Generate event string for each field
-                        string fieldEventString = $"        public static UnityEvent<{field.FieldType}> OnSend_{field.Name} = new UnityEvent<{field.FieldType}>();";
+                        string fieldEventString = $"        public static UnityEvent<{field.FieldType}> Send_{data.name}_{field.Name} = new UnityEvent<{field.FieldType}>();";
                         classBuilder.AppendLine(fieldEventString);
                     }
                 }
