@@ -177,6 +177,7 @@ namespace AnarchyConstructFramework.Editor
             {
                 string codeFolderPath = Path.Combine(constructFolderPath, "Code");
                 CreateAssemblyDefinitionFile(codeFolderPath, settings.RootNamespace);
+                CreateConstructDataScript();
             }
 
             AssetDatabase.Refresh();
