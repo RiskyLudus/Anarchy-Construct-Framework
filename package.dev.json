@@ -1,6 +1,6 @@
 {
   "name": "com.risky.anarchy-construct-framework",
-  "version": "1.4.0-dev",
+  "version": "1.5.0-dev",
   "displayName": "Anarchy Construct Framework (Dev)",
   "description": "A modular gameplay architecture centered around message bus and modular gameplay ideas. (Development Version)",
   "unity": "2022.3",
