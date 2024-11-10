@@ -201,17 +201,20 @@ namespace AnarchyConstructFramework.Editor
             string scriptPath = Path.Combine(codeFolderPath, $"{_constructName}Data.cs");
             if (!File.Exists(scriptPath))
             {
-                // Write the new Data script
+                // Write the new Data script with proper indentation
                 using (StreamWriter writer = new StreamWriter(scriptPath))
                 {
                     writer.WriteLine("using AnarchyConstructFramework.Core.Common;");
                     writer.WriteLine("using UnityEngine;");
                     writer.WriteLine();
-                    writer.WriteLine($"[CreateAssetMenu(fileName = \"{_constructName}Data\", menuName = \"Anarchy/Create {_constructName}Data\")]");
-                    writer.WriteLine($"public class {_constructName}Data : AnarchyData");
+                    writer.WriteLine($"namespace {settings.RootNamespace}.Constructs.{_constructName}");
                     writer.WriteLine("{");
-                    writer.WriteLine("    // Add public fields for this construct's data");
-                    writer.WriteLine("    // Go to Anarchy/Update Bindings to use events");
+                    writer.WriteLine($"\t[CreateAssetMenu(fileName = \"{_constructName}Data\", menuName = \"Anarchy/Create {_constructName}Data\")]");
+                    writer.WriteLine($"\tpublic class {_constructName}Data : AnarchyData");
+                    writer.WriteLine("\t{");
+                    writer.WriteLine("\t\t// Add public fields for this construct's data");
+                    writer.WriteLine("\t\t// Go to Anarchy/Update Bindings to use events");
+                    writer.WriteLine("\t}");
                     writer.WriteLine("}");
                 }
 
@@ -219,6 +222,7 @@ namespace AnarchyConstructFramework.Editor
                 AssetDatabase.Refresh();
             }
         }
+
 
         private void CreateAssemblyDefinitionFile(string folderPath, string rootNamespace)
         {

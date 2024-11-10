@@ -15,4 +15,3 @@ MonoBehaviour:
   RootNamespace: AnarchyConstructFramework
   PathToAnarchyConstructFramework: Assets/Anarchy-Construct-Framework
   PathToConstructs: Assets/Anarchy-Construct-Framework/_Constructs
-  UpdateBindingsAfterConstructCreation: 1

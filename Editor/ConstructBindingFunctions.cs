@@ -1,11 +1,9 @@
 using AnarchyConstructFramework.Core.Common;
-using AnarchyConstructFramework.Core.ScriptableObjects;
 using UnityEditor;
 using System.Reflection;
 using System.Text;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace AnarchyConstructFramework.Editor
 {
