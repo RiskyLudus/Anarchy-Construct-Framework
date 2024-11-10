@@ -1,14 +1,18 @@
+using AnarchyConstructFramework.Core.Common;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditorInternal;
+using System;
 
 namespace AnarchyConstructFramework.Editor
 {
     public class ConstructWizard : EditorWindow
     {
         private string _constructName;
+        private AssemblyDefinitionAsset _anarchyAssemblyDefinition;
+        private AssemblyDefinitionAsset _anarchyAssemblySharedDefinition;
         private List<AssemblyDefinitionAsset> _assemblies = new List<AssemblyDefinitionAsset>();
 
         // Folder toggles
@@ -20,8 +24,8 @@ namespace AnarchyConstructFramework.Editor
         private bool _includeTextures = true;
         private bool _includeAnimations = true;
         private bool _includeSettings = true;
-        private bool _includeScenes = true;
-        private bool _includeTests = true;
+        private bool _includeScenes = false;
+        private bool _includeTests = false;
 
         [MenuItem("Anarchy/Create Construct")]
         static void Init()
@@ -38,8 +42,18 @@ namespace AnarchyConstructFramework.Editor
             _constructName = EditorGUILayout.TextField(_constructName);
             GUILayout.Space(10);
 
+            // Fetch the Anarchy Assembly Definition if it's not already set
+            if (_anarchyAssemblyDefinition == null)
+            {
+                _anarchyAssemblyDefinition = FindAnarchyAssemblyDefinition();
+            }
+            
+            if (_anarchyAssemblySharedDefinition == null)
+            {
+                _anarchyAssemblySharedDefinition = FindAnarchySharedAssemblyDefinition();
+            }
+
             GUILayout.Label("Select Folders to Include:");
-            _includeCode = EditorGUILayout.Toggle("Code", _includeCode);
             _includeModels = EditorGUILayout.Toggle("Models", _includeModels);
             _includeMaterials = EditorGUILayout.Toggle("Materials", _includeMaterials);
             _includeShaders = EditorGUILayout.Toggle("Shaders", _includeShaders);
@@ -77,6 +91,62 @@ namespace AnarchyConstructFramework.Editor
                     Debug.LogError("Please enter a valid construct name.");
                 }
             }
+        }
+
+        private AssemblyDefinitionAsset FindAnarchyAssemblyDefinition()
+        {
+            // First, try to find in the Assets folder.
+            string[] guids = AssetDatabase.FindAssets("AnarchyConstructFramework");
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                AssemblyDefinitionAsset asmdef = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
+                if (asmdef != null && asmdef.name == "AnarchyConstructFramework")
+                {
+                    Debug.Log("Found Anarchy Assembly Definition in Assets at: " + path);
+                    return asmdef;
+                }
+            }
+
+            // If not found in Assets, check the Packages folder.
+            string packageAsmdefPath = "Packages/com.risky.anarchy-construct-framework/Core/AnarchyConstructFramework.asmdef";
+            AssemblyDefinitionAsset packageAsmdef = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(packageAsmdefPath);
+            if (packageAsmdef != null)
+            {
+                Debug.Log("Found Anarchy Assembly Definition in Packages at: " + packageAsmdefPath);
+                return packageAsmdef;
+            }
+
+            Debug.LogError("Anarchy Assembly Definition not found in Assets or Packages. Please ensure it exists in the project.");
+            return null;
+        }
+        
+        private AssemblyDefinitionAsset FindAnarchySharedAssemblyDefinition()
+        {
+            // First, try to find in the Assets folder.
+            string[] guids = AssetDatabase.FindAssets("Anarchy.Shared");
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                AssemblyDefinitionAsset asmdef = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
+                if (asmdef != null && asmdef.name == "Anarchy.Shared")
+                {
+                    Debug.Log("Found Anarchy Shared Assembly Definition in Assets at: " + path);
+                    return asmdef;
+                }
+            }
+
+            // If not found in Assets, check the Packages folder.
+            string packageAsmdefPath = "Packages/com.risky.anarchy-construct-framework/Shared/AnarchyConstructFramework.asmdef";
+            AssemblyDefinitionAsset packageAsmdef = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(packageAsmdefPath);
+            if (packageAsmdef != null)
+            {
+                Debug.Log("Found Anarchy Shared Assembly Definition in Packages at: " + packageAsmdefPath);
+                return packageAsmdef;
+            }
+
+            Debug.LogError("Anarchy Shared Assembly Definition not found in Assets or Packages. Please ensure it exists in the project.");
+            return null;
         }
 
         private void CreateConstructFolderStructure()
@@ -121,6 +191,33 @@ namespace AnarchyConstructFramework.Editor
                 catch (System.Exception ex) { Debug.LogError("Error creating folder: " + ex.Message); }
             }
         }
+        
+        private void CreateConstructDataScript()
+        {
+            var settings = AnarchyConstructFrameworkEditorFunctions.GetSettings();
+            string codeFolderPath = Path.Combine(settings.PathToConstructs, _constructName, "Code");
+
+            string scriptPath = Path.Combine(codeFolderPath, $"{_constructName}Data.cs");
+            if (!File.Exists(scriptPath))
+            {
+                // Write the new Data script
+                using (StreamWriter writer = new StreamWriter(scriptPath))
+                {
+                    writer.WriteLine("using AnarchyConstructFramework.Core.Common;");
+                    writer.WriteLine("using UnityEngine;");
+                    writer.WriteLine();
+                    writer.WriteLine($"[CreateAssetMenu(fileName = \"{_constructName}Data\", menuName = \"Anarchy/Create {_constructName}Data\")]");
+                    writer.WriteLine($"public class {_constructName}Data : AnarchyData");
+                    writer.WriteLine("{");
+                    writer.WriteLine("    // Add public fields for this construct's data");
+                    writer.WriteLine("    // Go to Anarchy/Update Bindings to use events");
+                    writer.WriteLine("}");
+                }
+
+                // Refresh AssetDatabase to recognize the new script
+                AssetDatabase.Refresh();
+            }
+        }
 
         private void CreateAssemblyDefinitionFile(string folderPath, string rootNamespace)
         {
@@ -132,26 +229,37 @@ namespace AnarchyConstructFramework.Editor
                 using (StreamWriter writer = new StreamWriter(asmdefFilePath))
                 {
                     writer.WriteLine("{");
-                    writer.WriteLine("  \"name\": \"" + _constructName + "\",");
+                    writer.WriteLine("  \"name\": \"" + rootNamespace + ".Constructs." + _constructName + "\",");
                     writer.WriteLine("  \"rootNamespace\": \"" + rootNamespace + ".Constructs." + _constructName + "\",");
-
-                    // Properly handle assembly references by writing only their names
                     writer.WriteLine("  \"references\": [");
+
+                    if (_anarchyAssemblyDefinition != null)
+                    {
+                        string anarchyAssemblyName = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(_anarchyAssemblyDefinition));
+                        writer.Write("    \"" + anarchyAssemblyName + "\"");
+                        writer.WriteLine(",");
+                    }
+                    
+                    if (_anarchyAssemblySharedDefinition != null)
+                    {
+                        string anarchyAssemblyName = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(_anarchyAssemblySharedDefinition));
+                        writer.Write("    \"" + anarchyAssemblyName + "\"");
+                        if (_assemblies.Count > 0) writer.WriteLine(",");
+                        else writer.WriteLine();
+                    }
+
                     for (int i = 0; i < _assemblies.Count; i++)
                     {
                         if (_assemblies[i] != null)
                         {
-                            // Get the assembly name directly from the asset
-                            string asmdefPath = AssetDatabase.GetAssetPath(_assemblies[i]);
-                            string assemblyName = Path.GetFileNameWithoutExtension(asmdefPath); // Extract the name
-
+                            string assemblyName = Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(_assemblies[i]));
                             writer.Write("    \"" + assemblyName + "\"");
                             if (i < _assemblies.Count - 1) writer.WriteLine(",");
                             else writer.WriteLine();
                         }
                     }
-                    writer.WriteLine("  ],");
 
+                    writer.WriteLine("  ],");
                     writer.WriteLine("  \"includePlatforms\": [],");
                     writer.WriteLine("  \"excludePlatforms\": [],");
                     writer.WriteLine("  \"allowUnsafeCode\": false,");

@@ -23,7 +23,7 @@ namespace AnarchyConstructFramework.Editor
             GUILayout.Label("Welcome to Anarchy!", EditorStyles.boldLabel);
             GUILayout.Space(10);
             GUILayout.Label("Where should we place our folder?");
-            _pathToAnarchyFolder = EditorGUILayout.TextField("Anarchy Folder Path", _pathToAnarchyFolder);
+            _pathToAnarchyFolder = EditorGUILayout.TextField("Anarchy Folder Path (we already assume it's under Assets)", _pathToAnarchyFolder);
             GUILayout.Label("Where should the construct folder be placed?");
             _constructFolderLocation = EditorGUILayout.TextField("Construct Folder Path", _constructFolderLocation);
             GUILayout.Label("What namespace would you like to generate with?");
@@ -79,6 +79,7 @@ namespace AnarchyConstructFramework.Editor
             }
 
             AssetDatabase.Refresh();
+            CreateSharedFolderAndAsmdef();
             CreateAnarchySettings();
         }
 
@@ -99,6 +100,60 @@ namespace AnarchyConstructFramework.Editor
             {
                 Debug.LogError("Failed to create AnarchySettings.");
             }
+        }
+
+        private void CreateSharedFolderAndAsmdef()
+        {
+            // Define the Shared folder path
+            string sharedFolderPath = Path.Combine(_pathToAnarchyFolder, "Shared");
+
+            // Create the Shared folder if it doesn't exist
+            if (!AssetDatabase.IsValidFolder(sharedFolderPath))
+            {
+                AssetDatabase.CreateFolder(_pathToAnarchyFolder, "Shared");
+            }
+
+            // Locate the AnarchyConstructFramework asmdef
+            string[] asmdefGuids = AssetDatabase.FindAssets("AnarchyConstructFramework t:asmdef");
+            string anarchyAsmdefReference = null;
+
+            if (asmdefGuids.Length > 0)
+            {
+                // Get the path to the first matched asmdef file
+                anarchyAsmdefReference = Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(asmdefGuids[0]));
+            }
+            else
+            {
+                Debug.LogError("AnarchyConstructFramework asmdef file not found. Ensure it exists in the project.");
+                return;
+            }
+
+            // Define the asmdef content with the reference to AnarchyConstructFramework
+            string asmdefContent = $@"
+{{
+    ""name"": ""Anarchy.Shared"",
+    ""rootNamespace"": ""Anarchy.Shared"",
+    ""references"": [
+        ""{anarchyAsmdefReference}""
+    ],
+    ""includePlatforms"": [],
+    ""excludePlatforms"": [],
+    ""allowUnsafeCode"": false,
+    ""overrideReferences"": false,
+    ""precompiledReferences"": [],
+    ""autoReferenced"": true,
+    ""defineConstraints"": [],
+    ""versionDefines"": [],
+    ""noEngineReferences"": false
+}}";
+
+            // Write the asmdef file to the Shared folder
+            string asmdefPath = Path.Combine(sharedFolderPath, "Anarchy.Shared.asmdef");
+            File.WriteAllText(asmdefPath, asmdefContent);
+
+            // Refresh the AssetDatabase to recognize the new asmdef file
+            AssetDatabase.Refresh();
+            Debug.Log("Shared folder and asmdef created with reference to AnarchyConstructFramework.");
         }
     }
 }
