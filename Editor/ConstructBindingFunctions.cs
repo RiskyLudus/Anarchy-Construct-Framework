@@ -29,6 +29,7 @@ namespace AnarchyConstructFramework.Editor
             // Start the class definition
             classBuilder.AppendLine("using UnityEngine.Events;");
             classBuilder.AppendLine("using UnityEngine;");
+            classBuilder.AppendLine("using AnarchyConstructFramework.Core.Common;");  // Include ConstructLoader
             classBuilder.AppendLine();
             classBuilder.AppendLine("namespace Anarchy.Shared");
             classBuilder.AppendLine("{");
@@ -57,6 +58,15 @@ namespace AnarchyConstructFramework.Editor
                         // Generate event string for each field
                         string fieldEventString = $"        public static UnityEvent<{field.FieldType}> Send_{data.name}_{field.Name} = new UnityEvent<{field.FieldType}>();";
                         classBuilder.AppendLine(fieldEventString);
+                        
+                        // Check if the field is a prefab address (string) for loading/unloading
+                        if (field.FieldType == typeof(string))
+                        {
+                            string loadEvent = $"        public static void Load_{data.name}_{field.Name}() => ConstructLoader.LoadPrefabConstructAsync(\"{field.GetValue(data)}\");";
+                            string unloadEvent = $"        public static void Unload_{data.name}_{field.Name}() => ConstructLoader.UnloadPrefabConstruct(\"{field.GetValue(data)}\");";
+                            classBuilder.AppendLine(loadEvent);
+                            classBuilder.AppendLine(unloadEvent);
+                        }
                     }
                 }
             }
