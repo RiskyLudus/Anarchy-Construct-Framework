@@ -94,12 +94,12 @@ namespace Anarchy.Editor
         private AssemblyDefinitionAsset FindAnarchyAssemblyDefinition()
         {
             // First, try to find in the Assets folder.
-            string[] guids = AssetDatabase.FindAssets("AnarchyConstructFramework");
+            string[] guids = AssetDatabase.FindAssets("Anarchy");
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 AssemblyDefinitionAsset asmdef = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(path);
-                if (asmdef != null && asmdef.name == "AnarchyConstructFramework")
+                if (asmdef != null && asmdef.name == "Anarchy")
                 {
                     Debug.Log("Found Anarchy Assembly Definition in Assets at: " + path);
                     return asmdef;
@@ -107,7 +107,7 @@ namespace Anarchy.Editor
             }
 
             // If not found in Assets, check the Packages folder.
-            string packageAsmdefPath = "Packages/com.risky.anarchy-construct-framework/Core/AnarchyConstructFramework.asmdef";
+            string packageAsmdefPath = "Packages/com.risky.anarchy-construct-framework/Core/Anarchy.asmdef";
             AssemblyDefinitionAsset packageAsmdef = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(packageAsmdefPath);
             if (packageAsmdef != null)
             {
@@ -135,7 +135,7 @@ namespace Anarchy.Editor
             }
 
             // If not found in Assets, check the Packages folder.
-            string packageAsmdefPath = "Packages/com.risky.anarchy-construct-framework/Shared/AnarchyConstructFramework.asmdef";
+            string packageAsmdefPath = "Packages/com.risky.anarchy-construct-framework/Shared/Anarchy.asmdef";
             AssemblyDefinitionAsset packageAsmdef = AssetDatabase.LoadAssetAtPath<AssemblyDefinitionAsset>(packageAsmdefPath);
             if (packageAsmdef != null)
             {

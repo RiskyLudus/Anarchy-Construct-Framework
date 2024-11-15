@@ -9,7 +9,7 @@ namespace Anarchy.Editor
     {
         private string _constructFolderLocation = "Assets/_Constructs";
         private string _pathToAnarchyFolder = "Assets/Anarchy";
-        private string _rootNamespace = "Anarchy";
+        private string _rootNamespace = "MyProject";
         
         [MenuItem("Anarchy/Setup Wizard")]
         static void Init()
@@ -23,7 +23,7 @@ namespace Anarchy.Editor
             GUILayout.Label("Welcome to Anarchy!", EditorStyles.boldLabel);
             GUILayout.Space(10);
             GUILayout.Label("Where should we place our folder?");
-            _pathToAnarchyFolder = EditorGUILayout.TextField("Anarchy Folder Path (we already assume it's under Assets)", _pathToAnarchyFolder);
+            _pathToAnarchyFolder = EditorGUILayout.TextField("Anarchy Folder Path", _pathToAnarchyFolder);
             GUILayout.Label("Where should the construct folder be placed?");
             _constructFolderLocation = EditorGUILayout.TextField("Construct Folder Path", _constructFolderLocation);
             GUILayout.Label("What namespace would you like to generate with?");
@@ -114,7 +114,7 @@ namespace Anarchy.Editor
             }
 
             // Locate the AnarchyConstructFramework asmdef
-            string[] asmdefGuids = AssetDatabase.FindAssets("AnarchyConstructFramework t:asmdef");
+            string[] asmdefGuids = AssetDatabase.FindAssets("Anarchy t:asmdef");
             string anarchyAsmdefReference = null;
 
             if (asmdefGuids.Length > 0)
@@ -124,7 +124,7 @@ namespace Anarchy.Editor
             }
             else
             {
-                Debug.LogError("AnarchyConstructFramework asmdef file not found. Ensure it exists in the project.");
+                Debug.LogError("Anarchy asmdef file not found. Ensure it exists in the project.");
                 return;
             }
 
@@ -153,7 +153,7 @@ namespace Anarchy.Editor
 
             // Refresh the AssetDatabase to recognize the new asmdef file
             AssetDatabase.Refresh();
-            Debug.Log("Shared folder and asmdef created with reference to AnarchyConstructFramework.");
+            Debug.Log("Shared folder and asmdef created with reference to Anarchy.");
         }
     }
 }
