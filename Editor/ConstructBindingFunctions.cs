@@ -46,7 +46,7 @@ namespace Anarchy.Editor
             var classBuilder = new StringBuilder();
             classBuilder.AppendLine("using UnityEngine.Events;");
             classBuilder.AppendLine("using UnityEngine;");
-            classBuilder.AppendLine("using AnarchyConstructFramework.Core.Common;");
+            classBuilder.AppendLine("using Anarchy.Core.Common;");
             classBuilder.AppendLine();
             classBuilder.AppendLine("namespace Anarchy.Shared");
             classBuilder.AppendLine("{");

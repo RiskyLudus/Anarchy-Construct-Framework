@@ -113,18 +113,25 @@ namespace Anarchy.Editor
                 AssetDatabase.CreateFolder(_pathToAnarchyFolder, "Shared");
             }
 
-            // Locate the AnarchyConstructFramework asmdef
+            // Locate the Anarchy.asmdef explicitly
             string[] asmdefGuids = AssetDatabase.FindAssets("Anarchy t:asmdef");
             string anarchyAsmdefReference = null;
 
-            if (asmdefGuids.Length > 0)
+            foreach (var guid in asmdefGuids)
             {
-                // Get the path to the first matched asmdef file
-                anarchyAsmdefReference = Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(asmdefGuids[0]));
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                string fileName = Path.GetFileNameWithoutExtension(path);
+
+                if (fileName == "Anarchy")
+                {
+                    anarchyAsmdefReference = fileName;
+                    break;
+                }
             }
-            else
+
+            if (string.IsNullOrEmpty(anarchyAsmdefReference))
             {
-                Debug.LogError("Anarchy asmdef file not found. Ensure it exists in the project.");
+                Debug.LogError("Anarchy.asmdef file not found. Ensure it exists in the project.");
                 return;
             }
 

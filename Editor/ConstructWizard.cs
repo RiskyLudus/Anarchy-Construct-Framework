@@ -202,12 +202,12 @@ namespace Anarchy.Editor
                 // Write the new Data script with proper indentation
                 using (StreamWriter writer = new StreamWriter(scriptPath))
                 {
-                    writer.WriteLine("using AnarchyConstructFramework.Core.Common;");
+                    writer.WriteLine("using Anarchy.Core.Common;");
                     writer.WriteLine("using UnityEngine;");
                     writer.WriteLine();
                     writer.WriteLine($"namespace {settings.RootNamespace}.Constructs.{_constructName}");
                     writer.WriteLine("{");
-                    writer.WriteLine($"\t[CreateAssetMenu(fileName = \"{_constructName}Data\", menuName = \"Anarchy/Create {_constructName}Data\")]");
+                    writer.WriteLine($"\t[CreateAssetMenu(fileName = \"{_constructName}Data\", menuName = \"Anarchy/Constructs/Create {_constructName}Data\")]");
                     writer.WriteLine($"\tpublic class {_constructName}Data : AnarchyData");
                     writer.WriteLine("\t{");
                     writer.WriteLine("\t\t// Add public fields for this construct's data");
