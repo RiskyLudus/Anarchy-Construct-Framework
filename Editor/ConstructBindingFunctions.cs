@@ -1,11 +1,13 @@
 using System;
-using UnityEditor;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
-using Anarchy.Core.Common;
 using UnityEngine.Events;
+using Anarchy.Attributes;
+using Anarchy.Core.Common;
 
 namespace Anarchy.Editor
 {
@@ -22,8 +24,8 @@ namespace Anarchy.Editor
 
             StringBuilder classBuilder = InitializeClassBuilder();
 
-            AppendAnarchyDataBindings(classBuilder);
-            AppendAnarchyEventListeners(classBuilder);
+            AppendStaticUnityEvents(classBuilder);
+            AppendScriptableObjectFields(classBuilder);
 
             CloseClassBuilder(classBuilder);
 
@@ -46,7 +48,6 @@ namespace Anarchy.Editor
             var classBuilder = new StringBuilder();
             classBuilder.AppendLine("using UnityEngine.Events;");
             classBuilder.AppendLine("using UnityEngine;");
-            classBuilder.AppendLine("using Anarchy.Core.Common;");
             classBuilder.AppendLine();
             classBuilder.AppendLine("namespace Anarchy.Shared");
             classBuilder.AppendLine("{");
@@ -56,37 +57,7 @@ namespace Anarchy.Editor
             return classBuilder;
         }
 
-        static void AppendAnarchyDataBindings(StringBuilder classBuilder)
-        {
-            string[] guids = AssetDatabase.FindAssets("t:AnarchyData");
-
-            foreach (var guid in guids)
-            {
-                AnarchyData data = AssetDatabase.LoadAssetAtPath<AnarchyData>(AssetDatabase.GUIDToAssetPath(guid));
-
-                if (data != null)
-                {
-                    AppendDataFieldBindings(classBuilder, data);
-                }
-            }
-        }
-
-        static void AppendDataFieldBindings(StringBuilder classBuilder, AnarchyData data)
-        {
-            var fields = data.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-
-            foreach (var field in fields)
-            {
-                classBuilder.AppendLine(GenerateUnityEventDeclaration(data, field));
-            }
-        }
-
-        static string GenerateUnityEventDeclaration(AnarchyData data, FieldInfo field)
-        {
-            return $"        public static UnityEvent<{field.FieldType}> Send_{data.name}_{field.Name} = new UnityEvent<{field.FieldType}>();";
-        }
-
-        static void AppendAnarchyEventListeners(StringBuilder classBuilder)
+        static void AppendStaticUnityEvents(StringBuilder classBuilder)
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
@@ -94,35 +65,89 @@ namespace Anarchy.Editor
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    if (IsStaticAnarchyEventClass(type))
+                    if (IsStaticClass(type))
                     {
-                        AppendEventListenersForType(classBuilder, type);
+                        AppendUnityEventsInClass(classBuilder, type);
                     }
                 }
             }
         }
 
-        static bool IsStaticAnarchyEventClass(Type type)
+        static bool IsStaticClass(Type type)
         {
-            return type.IsClass && type.IsAbstract && type.IsSealed && type.IsSubclassOf(typeof(AnarchyEvents));
+            return type.IsClass && type.IsAbstract && type.IsSealed; // Static class check
         }
 
-        static void AppendEventListenersForType(StringBuilder classBuilder, Type type)
+        static void AppendUnityEventsInClass(StringBuilder classBuilder, Type type)
         {
-            var staticFields = type.GetFields(BindingFlags.Public | BindingFlags.Static);
+            var unityEventFields = type.GetFields(BindingFlags.Public | BindingFlags.Static)
+                                       .Where(f => f.FieldType.IsSubclassOf(typeof(UnityEventBase)));
 
-            foreach (var field in staticFields)
+            if (unityEventFields.Any())
             {
-                if (field.FieldType.IsSubclassOf(typeof(UnityEventBase)))
+                classBuilder.AppendLine($"        // UnityEvents in {type.FullName}");
+
+                foreach (var field in unityEventFields)
                 {
-                    classBuilder.AppendLine(GenerateEventListenerCode(type, field));
+                    classBuilder.AppendLine(GenerateUnityEventBindingCode(type, field));
                 }
             }
         }
 
-        static string GenerateEventListenerCode(Type type, FieldInfo field)
+        static string GenerateUnityEventBindingCode(Type type, FieldInfo field)
         {
-            return $"        {type.Name}.{field.Name}.AddListener(() => Debug.Log(\"{field.Name} invoked from {type.Name}\"));";
+            return $"{type.FullName}.{field.Name}.AddListener(value => Debug.Log(\"{field.Name} invoked from {type.FullName}: \" + value));";
+        }
+
+        static void AppendScriptableObjectFields(StringBuilder classBuilder)
+        {
+            string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
+
+            foreach (var guid in guids)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                var asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPath);
+
+                if (asset != null && asset.GetType().IsSubclassOf(typeof(AnarchyData)))
+                {
+                    AppendFieldsFromScriptableObject(classBuilder, asset);
+                }
+            }
+        }
+
+        static void AppendFieldsFromScriptableObject(StringBuilder classBuilder, ScriptableObject asset)
+        {
+            var type = asset.GetType();
+            var annotatedFields = type.GetFields(BindingFlags.Public | BindingFlags.Instance)
+                                      .Where(f => f.GetCustomAttribute<AnarchyAttribute>() != null);
+
+            foreach (var field in annotatedFields)
+            {
+                classBuilder.AppendLine(GenerateScriptableObjectEventCode(asset, field));
+            }
+        }
+
+        static string GenerateScriptableObjectEventCode(ScriptableObject asset, FieldInfo field)
+        {
+            string fieldType = ConvertToUnityType(field.FieldType);
+            string constructName = asset.name;
+
+            return $@"
+        public static UnityEvent<{fieldType}> Send_{constructName}_{field.Name} = new UnityEvent<{fieldType}>();
+        // Example usage: Send_{constructName}_{field.Name}.Invoke(newValue);
+";
+        }
+
+        static string ConvertToUnityType(Type type)
+        {
+            if (type == typeof(float) || type == typeof(Single)) return "float";
+            if (type == typeof(int) || type == typeof(Int32)) return "int";
+            if (type == typeof(bool)) return "bool";
+            if (type == typeof(string)) return "string";
+            if (type == typeof(Vector3)) return "Vector3";
+            if (type == typeof(Vector2)) return "Vector2";
+            if (type == typeof(Quaternion)) return "Quaternion";
+            return type.Name; // Fallback for other types
         }
 
         static void CloseClassBuilder(StringBuilder classBuilder)
