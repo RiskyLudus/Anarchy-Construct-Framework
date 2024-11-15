@@ -1,15 +1,15 @@
 using System.IO;
-using AnarchyConstructFramework.Core.ScriptableObjects;
+using Anarchy.Core.ScriptableObjects;
 using UnityEngine;
 using UnityEditor;
 
-namespace AnarchyConstructFramework.Editor
+namespace Anarchy.Editor
 {
     public class AnarchySetupWizard : EditorWindow
     {
-        private string _constructFolderLocation = "Assets/Anarchy-Construct-Framework/_Constructs";
-        private string _pathToAnarchyFolder = "Assets/Anarchy-Construct-Framework";
-        private string _rootNamespace = "AnarchyConstructFramework";
+        private string _constructFolderLocation = "Assets/_Constructs";
+        private string _pathToAnarchyFolder = "Assets/Anarchy";
+        private string _rootNamespace = "Anarchy";
         
         [MenuItem("Anarchy/Setup Wizard")]
         static void Init()

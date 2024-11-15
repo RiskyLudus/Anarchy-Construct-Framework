@@ -1,12 +1,10 @@
-using AnarchyConstructFramework.Core.Common;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditorInternal;
-using System;
 
-namespace AnarchyConstructFramework.Editor
+namespace Anarchy.Editor
 {
     public class ConstructWizard : EditorWindow
     {

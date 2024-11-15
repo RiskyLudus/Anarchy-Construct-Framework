@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace AnarchyConstructFramework.Core.ScriptableObjects
+namespace Anarchy.Core.ScriptableObjects
 {
     [CreateAssetMenu(fileName = "Data", menuName = "Anarchy/Create Settings", order = 1)]
     public class AnarchySettings : ScriptableObject

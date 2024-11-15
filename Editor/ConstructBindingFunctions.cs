@@ -3,9 +3,9 @@ using System.Reflection;
 using System.Text;
 using System.IO;
 using UnityEngine;
-using AnarchyConstructFramework.Core.Common;
+using Anarchy.Core.Common;
 
-namespace AnarchyConstructFramework.Editor
+namespace Anarchy.Editor
 {
     public class ConstructBindingFunctions
     {

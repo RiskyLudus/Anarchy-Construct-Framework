@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using AnarchyConstructFramework.Core.ScriptableObjects;
+using Anarchy.Core.ScriptableObjects;
 using UnityEditor;
 using UnityEngine;
 
-namespace AnarchyConstructFramework.Editor
+namespace Anarchy.Editor
 {
     public static class AnarchyConstructFrameworkEditorFunctions
     {

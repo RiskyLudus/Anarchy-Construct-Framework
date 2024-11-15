@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AnarchyConstructFramework.Core.Common
+namespace Anarchy.Core.Common
 {
     public static class AnarchyUtilities
     {
