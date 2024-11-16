@@ -1,15 +1,15 @@
 using System.IO;
-using AnarchyConstructFramework.Core.ScriptableObjects;
+using Anarchy.Core.ScriptableObjects;
 using UnityEngine;
 using UnityEditor;
 
-namespace AnarchyConstructFramework.Editor
+namespace Anarchy.Editor
 {
     public class AnarchySetupWizard : EditorWindow
     {
-        private string _constructFolderLocation = "Assets/Anarchy-Construct-Framework/_Constructs";
-        private string _pathToAnarchyFolder = "Assets/Anarchy-Construct-Framework";
-        private string _rootNamespace = "AnarchyConstructFramework";
+        private string _constructFolderLocation = "Assets/_Constructs";
+        private string _pathToAnarchyFolder = "Assets/Anarchy";
+        private string _rootNamespace = "MyProject";
         
         [MenuItem("Anarchy/Setup Wizard")]
         static void Init()
@@ -23,7 +23,7 @@ namespace AnarchyConstructFramework.Editor
             GUILayout.Label("Welcome to Anarchy!", EditorStyles.boldLabel);
             GUILayout.Space(10);
             GUILayout.Label("Where should we place our folder?");
-            _pathToAnarchyFolder = EditorGUILayout.TextField("Anarchy Folder Path (we already assume it's under Assets)", _pathToAnarchyFolder);
+            _pathToAnarchyFolder = EditorGUILayout.TextField("Anarchy Folder Path", _pathToAnarchyFolder);
             GUILayout.Label("Where should the construct folder be placed?");
             _constructFolderLocation = EditorGUILayout.TextField("Construct Folder Path", _constructFolderLocation);
             GUILayout.Label("What namespace would you like to generate with?");
@@ -32,6 +32,7 @@ namespace AnarchyConstructFramework.Editor
             if (GUILayout.Button("Create Anarchy Folder"))
             {
                 CreateAnarchyFolderStructure();
+                Close();
             }
         }
 
@@ -113,18 +114,25 @@ namespace AnarchyConstructFramework.Editor
                 AssetDatabase.CreateFolder(_pathToAnarchyFolder, "Shared");
             }
 
-            // Locate the AnarchyConstructFramework asmdef
-            string[] asmdefGuids = AssetDatabase.FindAssets("AnarchyConstructFramework t:asmdef");
+            // Locate the Anarchy.asmdef explicitly
+            string[] asmdefGuids = AssetDatabase.FindAssets("Anarchy t:asmdef");
             string anarchyAsmdefReference = null;
 
-            if (asmdefGuids.Length > 0)
+            foreach (var guid in asmdefGuids)
             {
-                // Get the path to the first matched asmdef file
-                anarchyAsmdefReference = Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(asmdefGuids[0]));
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                string fileName = Path.GetFileNameWithoutExtension(path);
+
+                if (fileName == "Anarchy")
+                {
+                    anarchyAsmdefReference = fileName;
+                    break;
+                }
             }
-            else
+
+            if (string.IsNullOrEmpty(anarchyAsmdefReference))
             {
-                Debug.LogError("AnarchyConstructFramework asmdef file not found. Ensure it exists in the project.");
+                Debug.LogError("Anarchy.asmdef file not found. Ensure it exists in the project.");
                 return;
             }
 
@@ -153,7 +161,7 @@ namespace AnarchyConstructFramework.Editor
 
             // Refresh the AssetDatabase to recognize the new asmdef file
             AssetDatabase.Refresh();
-            Debug.Log("Shared folder and asmdef created with reference to AnarchyConstructFramework.");
+            Debug.Log("Shared folder and asmdef created with reference to Anarchy.");
         }
     }
 }

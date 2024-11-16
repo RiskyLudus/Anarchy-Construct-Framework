@@ -1,11 +1,11 @@
 using System.Linq;
-using AnarchyConstructFramework.Core.ScriptableObjects;
+using Anarchy.Core.ScriptableObjects;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 
-namespace AnarchyConstructFramework.Editor
+namespace Anarchy.Editor
 {
     public class AddressablesConstructBuilder
     {
