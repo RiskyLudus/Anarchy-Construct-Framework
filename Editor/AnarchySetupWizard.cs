@@ -32,6 +32,7 @@ namespace Anarchy.Editor
             if (GUILayout.Button("Create Anarchy Folder"))
             {
                 CreateAnarchyFolderStructure();
+                Close();
             }
         }
 
