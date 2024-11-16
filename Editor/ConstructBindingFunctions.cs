@@ -114,9 +114,18 @@ namespace Anarchy.Editor
             if (type == typeof(bool)) return "bool";
             if (type == typeof(string)) return "string";
             if (type == typeof(Vector3)) return "Vector3";
+            if (type == typeof(Vector2)) return "Vector2";
             if (type == typeof(Quaternion)) return "Quaternion";
+            if (type == typeof(Color)) return "Color";
             if (type == typeof(Transform)) return "Transform";
             if (type == typeof(GameObject)) return "GameObject";
+            if (type == typeof(Sprite)) return "Sprite";
+            if (type == typeof(AudioClip)) return "AudioClip";
+            if (type == typeof(Material)) return "Material";
+            if (type == typeof(Texture2D)) return "Texture2D";
+            if (type == typeof(RectTransform)) return "RectTransform";
+            if (type == typeof(Collider)) return "Collider";
+            if (type == typeof(Rigidbody)) return "Rigidbody";
             return null; // Unsupported type
         }
 
@@ -129,9 +138,18 @@ namespace Anarchy.Editor
                 case AnarchyEventDataTypes.Boolean: return "bool";
                 case AnarchyEventDataTypes.Float: return "float";
                 case AnarchyEventDataTypes.Vector3: return "Vector3";
+                case AnarchyEventDataTypes.Vector2: return "Vector2";
                 case AnarchyEventDataTypes.Quaternion: return "Quaternion";
+                case AnarchyEventDataTypes.Color: return "Color";
                 case AnarchyEventDataTypes.Transform: return "Transform";
                 case AnarchyEventDataTypes.GameObject: return "GameObject";
+                case AnarchyEventDataTypes.Sprite: return "Sprite";
+                case AnarchyEventDataTypes.AudioClip: return "AudioClip";
+                case AnarchyEventDataTypes.Material: return "Material";
+                case AnarchyEventDataTypes.Texture2D: return "Texture2D";
+                case AnarchyEventDataTypes.RectTransform: return "RectTransform";
+                case AnarchyEventDataTypes.Collider: return "Collider";
+                case AnarchyEventDataTypes.Rigidbody: return "Rigidbody";
                 default: return null;
             }
         }

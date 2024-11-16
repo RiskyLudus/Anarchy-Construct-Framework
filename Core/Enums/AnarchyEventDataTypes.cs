@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Anarchy.Enums
 {
     public enum AnarchyEventDataTypes
@@ -15,5 +11,14 @@ namespace Anarchy.Enums
         Quaternion = 6,
         Transform = 7,
         GameObject = 8,
+        Sprite = 9,
+        Color = 10,
+        Vector2 = 11,
+        AudioClip = 12,
+        Material = 13,
+        Texture2D = 14,
+        RectTransform = 15,
+        Collider = 16,
+        Rigidbody = 17
     }
 }
