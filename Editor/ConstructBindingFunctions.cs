@@ -1,46 +1,48 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Text;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
-using Anarchy.Attributes;
 using Anarchy.Core.Common;
+using Anarchy.Enums;
 
 namespace Anarchy.Editor
 {
-    public class ConstructBindingFunctions
+    public class ConstructBindingGenerator
     {
         [MenuItem("Anarchy/Update Bindings")]
         static void UpdateBindings()
         {
-            var settings = AnarchyConstructFrameworkEditorFunctions.GetSettings();
-            string anarchyPath = settings.PathToAnarchyConstructFramework;
-            string sharedFolderPath = Path.Combine(anarchyPath, "Shared");
-
-            EnsureDirectoryExists(sharedFolderPath);
+            // Path to save the generated bindings file
+            string outputPath = "Assets/Anarchy/Shared/ConstructBindings.cs";
 
             StringBuilder classBuilder = InitializeClassBuilder();
 
-            AppendStaticUnityEvents(classBuilder);
-            AppendScriptableObjectFields(classBuilder);
+            // Find all ScriptableObjects that extend AnarchyData
+            string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
+            foreach (var guid in guids)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                AnarchyData data = AssetDatabase.LoadAssetAtPath<AnarchyData>(assetPath);
+
+                if (data != null)
+                {
+                    AppendConstructHeader(classBuilder, data.name);
+                    AppendEventBindings(classBuilder, data);
+                    AppendFieldBindings(classBuilder, data);
+                    classBuilder.AppendLine();  // Add a blank line between constructs
+                }
+            }
 
             CloseClassBuilder(classBuilder);
 
-            string outputPath = WriteToFile(sharedFolderPath, classBuilder.ToString());
+            // Write the generated bindings to the output file
+            File.WriteAllText(outputPath, classBuilder.ToString());
             AssetDatabase.Refresh();
-
             Debug.Log($"ConstructBindings.cs generated at: {outputPath}");
-        }
-
-        static void EnsureDirectoryExists(string path)
-        {
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
         }
 
         static StringBuilder InitializeClassBuilder()
@@ -57,110 +59,87 @@ namespace Anarchy.Editor
             return classBuilder;
         }
 
-        static void AppendStaticUnityEvents(StringBuilder classBuilder)
+        static void AppendConstructHeader(StringBuilder classBuilder, string constructName)
         {
-            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+            classBuilder.AppendLine($"        // Events for {constructName}");
+        }
 
-            foreach (var assembly in allAssemblies)
+        static void AppendEventBindings(StringBuilder classBuilder, AnarchyData data)
+        {
+            foreach (var eventData in data.anarchyEvents)
             {
-                foreach (var type in assembly.GetTypes())
+                string eventType = GetUnityEventType(eventData);
+                if (!string.IsNullOrEmpty(eventType))
                 {
-                    if (IsStaticClass(type))
-                    {
-                        AppendUnityEventsInClass(classBuilder, type);
-                    }
+                    string eventName = $"Send_{data.name}_{eventData.eventName}";
+                    classBuilder.AppendLine($"        public static {eventType} {eventName} = new {eventType}();");
                 }
             }
         }
 
-        static bool IsStaticClass(Type type)
+        static void AppendFieldBindings(StringBuilder classBuilder, AnarchyData data)
         {
-            return type.IsClass && type.IsAbstract && type.IsSealed; // Static class check
-        }
+            var type = data.GetType();
+            var publicFields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
 
-        static void AppendUnityEventsInClass(StringBuilder classBuilder, Type type)
-        {
-            var unityEventFields = type.GetFields(BindingFlags.Public | BindingFlags.Static)
-                                       .Where(f => f.FieldType.IsSubclassOf(typeof(UnityEventBase)));
-
-            if (unityEventFields.Any())
+            foreach (var field in publicFields)
             {
-                classBuilder.AppendLine($"        // UnityEvents in {type.FullName}");
-
-                foreach (var field in unityEventFields)
+                string fieldType = ConvertToUnityType(field.FieldType);
+                if (!string.IsNullOrEmpty(fieldType))
                 {
-                    classBuilder.AppendLine(GenerateUnityEventBindingCode(type, field));
+                    string fieldEventName = $"Send_{data.name}_{field.Name}_Changed";
+                    classBuilder.AppendLine($"        public static UnityEvent<{fieldType}> {fieldEventName} = new UnityEvent<{fieldType}>();");
                 }
             }
         }
 
-        static string GenerateUnityEventBindingCode(Type type, FieldInfo field)
+        static string GetUnityEventType(AnarchyEventData eventData)
         {
-            return $"{type.FullName}.{field.Name}.AddListener(value => Debug.Log(\"{field.Name} invoked from {type.FullName}: \" + value));";
-        }
+            List<string> parameterTypes = new List<string>();
 
-        static void AppendScriptableObjectFields(StringBuilder classBuilder)
-        {
-            string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
+            // Check each type and convert to C# type names
+            if (eventData.type1 != AnarchyEventDataTypes.None) parameterTypes.Add(ConvertToCSharpType(eventData.type1));
+            if (eventData.type2 != AnarchyEventDataTypes.None) parameterTypes.Add(ConvertToCSharpType(eventData.type2));
+            if (eventData.type3 != AnarchyEventDataTypes.None) parameterTypes.Add(ConvertToCSharpType(eventData.type3));
+            if (eventData.type4 != AnarchyEventDataTypes.None) parameterTypes.Add(ConvertToCSharpType(eventData.type4));
 
-            foreach (var guid in guids)
-            {
-                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                var asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPath);
-
-                if (asset != null && asset.GetType().IsSubclassOf(typeof(AnarchyData)))
-                {
-                    AppendFieldsFromScriptableObject(classBuilder, asset);
-                }
-            }
-        }
-
-        static void AppendFieldsFromScriptableObject(StringBuilder classBuilder, ScriptableObject asset)
-        {
-            var type = asset.GetType();
-            var annotatedFields = type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-                                      .Where(f => f.GetCustomAttribute<AnarchyAttribute>() != null);
-
-            foreach (var field in annotatedFields)
-            {
-                classBuilder.AppendLine(GenerateScriptableObjectEventCode(asset, field));
-            }
-        }
-
-        static string GenerateScriptableObjectEventCode(ScriptableObject asset, FieldInfo field)
-        {
-            string fieldType = ConvertToUnityType(field.FieldType);
-            string constructName = asset.name;
-
-            return $@"
-        public static UnityEvent<{fieldType}> Send_{constructName}_{field.Name} = new UnityEvent<{fieldType}>();
-        // Example usage: Send_{constructName}_{field.Name}.Invoke(newValue);
-";
+            if (parameterTypes.Count == 0) return "UnityEvent";
+            return $"UnityEvent<{string.Join(", ", parameterTypes)}>";
         }
 
         static string ConvertToUnityType(Type type)
         {
-            if (type == typeof(float) || type == typeof(Single)) return "float";
-            if (type == typeof(int) || type == typeof(Int32)) return "int";
+            if (type == typeof(int)) return "int";
+            if (type == typeof(float)) return "float";
             if (type == typeof(bool)) return "bool";
             if (type == typeof(string)) return "string";
             if (type == typeof(Vector3)) return "Vector3";
-            if (type == typeof(Vector2)) return "Vector2";
             if (type == typeof(Quaternion)) return "Quaternion";
-            return type.Name; // Fallback for other types
+            if (type == typeof(Transform)) return "Transform";
+            if (type == typeof(GameObject)) return "GameObject";
+            return null; // Unsupported type
+        }
+
+        static string ConvertToCSharpType(AnarchyEventDataTypes type)
+        {
+            switch (type)
+            {
+                case AnarchyEventDataTypes.Integer: return "int";
+                case AnarchyEventDataTypes.String: return "string";
+                case AnarchyEventDataTypes.Boolean: return "bool";
+                case AnarchyEventDataTypes.Float: return "float";
+                case AnarchyEventDataTypes.Vector3: return "Vector3";
+                case AnarchyEventDataTypes.Quaternion: return "Quaternion";
+                case AnarchyEventDataTypes.Transform: return "Transform";
+                case AnarchyEventDataTypes.GameObject: return "GameObject";
+                default: return null;
+            }
         }
 
         static void CloseClassBuilder(StringBuilder classBuilder)
         {
             classBuilder.AppendLine("    }");
             classBuilder.AppendLine("}");
-        }
-
-        static string WriteToFile(string sharedFolderPath, string classContent)
-        {
-            string outputPath = Path.Combine(sharedFolderPath, "ConstructBindings.cs");
-            File.WriteAllText(outputPath, classContent);
-            return outputPath;
         }
     }
 }
