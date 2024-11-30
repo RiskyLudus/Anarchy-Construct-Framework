@@ -32,7 +32,6 @@ namespace Anarchy.Editor
                 {
                     AppendConstructHeader(classBuilder, data.name);
                     AppendEventBindings(classBuilder, data);
-                    AppendFieldBindings(classBuilder, data);
                     classBuilder.AppendLine();  // Add a blank line between constructs
                 }
             }
@@ -73,22 +72,6 @@ namespace Anarchy.Editor
                 {
                     string eventName = $"Send_{data.name}_{eventData.eventName}";
                     classBuilder.AppendLine($"        public static {eventType} {eventName} = new {eventType}();");
-                }
-            }
-        }
-
-        static void AppendFieldBindings(StringBuilder classBuilder, AnarchyData data)
-        {
-            var type = data.GetType();
-            var publicFields = type.GetFields(BindingFlags.Public | BindingFlags.Instance);
-
-            foreach (var field in publicFields)
-            {
-                string fieldType = ConvertToUnityType(field.FieldType);
-                if (!string.IsNullOrEmpty(fieldType))
-                {
-                    string fieldEventName = $"Send_{data.name}_{field.Name}_Changed";
-                    classBuilder.AppendLine($"        public static UnityEvent<{fieldType}> {fieldEventName} = new UnityEvent<{fieldType}>();");
                 }
             }
         }
