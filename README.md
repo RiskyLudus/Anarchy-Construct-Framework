@@ -14,4 +14,17 @@ Constructs are best thought of as a noun inside of a world. I mean like a person
 6. Add public fields you want to generate and any events you want to generate in the settings.
 7. Go to Anarchy -> Update Bindings and let the code auto-generate your Unity Events.
 
+
+## Anarchy Construct Framework Roadmap
+
+| **Version** | **Milestone**                                    | **Key Features**                                                                                 |
+|-------------|--------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| **v1.7.0**  | Core Improvements                                | ConstructManager, lifecycle hooks, metadata querying, fallback handling, `_AssetDatabase` tool. |
+| **v1.8.0**  | Validation and DLL Management                    | Validation tools, dynamic DLL generation, runtime DLL loading, persistent weaving system.        |
+| **v1.9.0**  | Dynamic Loading and Procedural Integration       | Summoning constructs, procedural placement integration, support for custom event data types.     |
+| **v2.0.0**  | Advanced Tools                                   | Enhanced ConstructWizard, dependency graph editor, finalize procedural placement system.         |
+
+---
+
 Please submit any issues you find and if you like this, leave a star!
+
