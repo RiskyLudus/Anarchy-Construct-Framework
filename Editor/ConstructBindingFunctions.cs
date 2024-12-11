@@ -22,7 +22,7 @@ namespace Anarchy.Editor
             StringBuilder classBuilder = InitializeClassBuilder();
 
             // Find all ScriptableObjects that extend AnarchyData
-            string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
+            string[] guids = AssetDatabase.FindAssets("t:AnarchyData");
             foreach (var guid in guids)
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(guid);
@@ -65,13 +65,16 @@ namespace Anarchy.Editor
 
         static void AppendEventBindings(StringBuilder classBuilder, AnarchyData data)
         {
-            foreach (var eventData in data.anarchyEvents)
+            if (data.anarchyEvents != null && data.anarchyEvents.Length > 0)
             {
-                string eventType = GetUnityEventType(eventData);
-                if (!string.IsNullOrEmpty(eventType))
+                foreach (var eventData in data.anarchyEvents)
                 {
-                    string eventName = $"Send_{data.name}_{eventData.eventName}";
-                    classBuilder.AppendLine($"        public static {eventType} {eventName} = new {eventType}();");
+                    string eventType = GetUnityEventType(eventData);
+                    if (!string.IsNullOrEmpty(eventType))
+                    {
+                        string eventName = $"Send_{data.name}_{eventData.eventName}";
+                        classBuilder.AppendLine($"        public static {eventType} {eventName} = new {eventType}();");
+                    }
                 }
             }
         }
