@@ -112,6 +112,8 @@ namespace Anarchy.Editor
             if (type == typeof(RectTransform)) return "RectTransform";
             if (type == typeof(Collider)) return "Collider";
             if (type == typeof(Rigidbody)) return "Rigidbody";
+            if (type == typeof(byte)) return "byte";
+            if (type == typeof(byte[])) return "byte[]";
             return null; // Unsupported type
         }
 
@@ -136,6 +138,8 @@ namespace Anarchy.Editor
                 case AnarchyEventDataTypes.RectTransform: return "RectTransform";
                 case AnarchyEventDataTypes.Collider: return "Collider";
                 case AnarchyEventDataTypes.Rigidbody: return "Rigidbody";
+                case AnarchyEventDataTypes.Byte: return "byte";
+                case AnarchyEventDataTypes.ByteArray: return "byte[]";
                 default: return null;
             }
         }

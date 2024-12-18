@@ -19,6 +19,8 @@ namespace Anarchy.Enums
         Texture2D = 14,
         RectTransform = 15,
         Collider = 16,
-        Rigidbody = 17
+        Rigidbody = 17,
+        Byte = 18,
+        ByteArray = 19,
     }
 }
